@@ -9,22 +9,27 @@ export async function GET() {
     const userCount = await prisma.user.count();
     const cardCount = await prisma.card.count();
 
-    // Get deck names if any exist
-    const deckNames = await prisma.deck.findMany({ select: { name: true, isPrebuilt: true, _count: { select: { cards: true } } }, take: 10 });
-
-    // Raw query to check tables
-    const tables = await prisma.$queryRawUnsafe("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+    // Test NextAuth import
+    let authTest = "not tested";
+    try {
+      const { auth } = await import("@/lib/auth");
+      const session = await auth();
+      authTest = session ? `authenticated as ${session.user?.email}` : "no session (ok)";
+    } catch (authError) {
+      authTest = `error: ${authError instanceof Error ? authError.message : String(authError)}`;
+    }
 
     return NextResponse.json({
       status: "ok",
       database: "connected",
       counts: { decks: deckCount, prebuilt: prebuiltCount, users: userCount, cards: cardCount },
-      deckNames,
-      tables,
+      authTest,
       env: {
         hasDbUrl: !!process.env.DATABASE_URL,
         hasAuthSecret: !!(process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET),
         hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
+        hasAuthUrl: !!process.env.AUTH_URL,
+        nextAuthUrl: process.env.NEXTAUTH_URL ? process.env.NEXTAUTH_URL.replace(/\/\/.*@/, "//***@") : "not set",
         nodeEnv: process.env.NODE_ENV,
       },
     });
