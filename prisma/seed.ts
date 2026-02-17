@@ -1,4 +1,6 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { pythonBasicsCards } from "./seed-data/python-basics";
 import { javascriptFundamentalsCards } from "./seed-data/javascript-fundamentals";
 import { htmlCssEssentialsCards } from "./seed-data/html-css-essentials";
@@ -6,7 +8,9 @@ import { sqlFundamentalsCards } from "./seed-data/sql-fundamentals";
 import { gitCommandLineCards } from "./seed-data/git-command-line";
 import { dataStructuresAlgorithmsCards } from "./seed-data/data-structures-algorithms";
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL!;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 const DECKS = [
   {
