@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String?
+  avatarPreset String   @default("tomato-1")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Timer settings
+  pomodoroMinutes    Int     @default(25)
+  shortBreakMinutes  Int     @default(5)
+  longBreakMinutes   Int     @default(15)
+  longBreakInterval  Int     @default(4)
+  autoStartBreaks    Boolean @default(false)
+  autoStartPomodoros Boolean @default(false)
+  soundEnabled       Boolean @default(true)
+
+  // Study settings
+  newCardsPerDay Int    @default(20)
+  theme          String @default("system")
+
+  // Relations
+  decks            Deck[]
+  cardReviews      CardReview[]
+  pomodoroSessions PomodoroSession[]
+  resetTokens      PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  folder      String?
+  isPrebuilt  Boolean  @default(false)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cards            Card[]
+  pomodoroSessions PomodoroSession[]
+
+  @@index([userId])
+  @@index([isPrebuilt])
+}
+
+enum CardType {
+  STANDARD
+  CODE
+  FILL_IN_BLANK
+}
+
+model Card {
+  id     String   @id @default(cuid())
+  deckId String
+  deck   Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  type   CardType @default(STANDARD)
+
+  front String @db.Text
+  back  String @db.Text
+
+  // CODE type fields
+  codeTemplate   String? @db.Text
+  codeLanguage   String?
+  expectedOutput String? @db.Text
+
+  // FILL_IN_BLANK type fields
+  blankAnswers String[]
+  codeSnippet  String?  @db.Text
+
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviews CardReview[]
+
+  @@index([deckId])
+}
+
+enum CardState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+}
+
+model CardReview {
+  id     String @id @default(cuid())
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // SM-2 state
+  state       CardState @default(NEW)
+  easeFactor  Float     @default(2.5)
+  interval    Int       @default(0)
+  repetitions Int       @default(0)
+
+  // Scheduling
+  nextReviewAt DateTime  @default(now())
+  lastReviewAt DateTime?
+
+  // Last review info
+  lastRating   Int?
+  responseTime Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cardId, userId])
+  @@index([userId, nextReviewAt])
+  @@index([userId, state])
+}
+
+enum SessionType {
+  FOCUS
+  SHORT_BREAK
+  LONG_BREAK
+}
+
+model PomodoroSession {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deckId          String?
+  deck            Deck?       @relation(fields: [deckId], references: [id], onDelete: SetNull)
+  type            SessionType @default(FOCUS)
+  durationMinutes Int
+  startedAt       DateTime    @default(now())
+  completedAt     DateTime?
+  wasCompleted    Boolean     @default(false)
+  cardsStudied    Int         @default(0)
+  cardsCorrect    Int         @default(0)
+
+  @@index([userId, startedAt])
+}

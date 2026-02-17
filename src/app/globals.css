@@ -2,26 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 30 50% 98%;
+    --foreground: 15 25% 10%;
+    --card: 30 40% 99%;
+    --card-foreground: 15 25% 10%;
+    --popover: 30 40% 99%;
+    --popover-foreground: 15 25% 10%;
+    --primary: 9 85% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 30% 93%;
+    --secondary-foreground: 15 25% 15%;
+    --muted: 30 20% 94%;
+    --muted-foreground: 15 10% 45%;
+    --accent: 24 90% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 9 85% 52%;
+    --chart-1: 9 85% 52%;
+    --chart-2: 142 60% 40%;
+    --chart-3: 24 90% 55%;
+    --chart-4: 45 85% 55%;
+    --chart-5: 200 65% 50%;
+    --radius: 0.625rem;
+    --tomato: 9 85% 52%;
+    --tomato-light: 9 85% 62%;
+    --tomato-dark: 9 85% 42%;
+    --garden-green: 142 60% 40%;
+    --break-green: 158 55% 45%;
+    --warning: 45 85% 55%;
+  }
+
+  .dark {
+    --background: 15 15% 8%;
+    --foreground: 30 20% 95%;
+    --card: 15 15% 10%;
+    --card-foreground: 30 20% 95%;
+    --popover: 15 15% 10%;
+    --popover-foreground: 30 20% 95%;
+    --primary: 9 80% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 15 12% 16%;
+    --secondary-foreground: 30 20% 90%;
+    --muted: 15 10% 16%;
+    --muted-foreground: 15 10% 55%;
+    --accent: 24 85% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 15 10% 18%;
+    --input: 15 10% 18%;
+    --ring: 9 80% 55%;
+    --chart-1: 9 80% 55%;
+    --chart-2: 142 55% 45%;
+    --chart-3: 24 85% 55%;
+    --chart-4: 45 80% 55%;
+    --chart-5: 200 60% 55%;
+    --tomato: 9 80% 55%;
+    --tomato-light: 9 80% 65%;
+    --tomato-dark: 9 80% 45%;
+    --garden-green: 142 55% 45%;
+    --break-green: 158 50% 50%;
+    --warning: 45 80% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Card flip animation */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Timer pulse animation */
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-timer-pulse {
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+/* Smooth card transition */
+.card-flip-transition {
+  transition: transform 0.6s ease;
+}
+
+/* Code editor font */
+.font-code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-flip-transition {
+    transition: none;
+  }
+  .animate-timer-pulse {
+    animation: none;
   }
 }
